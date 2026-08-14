@@ -4931,10 +4931,11 @@ async function generateStatement(){
     '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">',
     '<style>',
     '*{margin:0;padding:0;box-sizing:border-box}',
-    'body{font-family:Cairo,sans-serif;background:#0A0F1E;color:#F5F0E8;direction:rtl;width:794px;min-height:1123px}',
-    '.page{width:794px;min-height:1123px;background:#0A0F1E;padding:0 0 30px}',
+    'body{font-family:Cairo,sans-serif;background:#0A0F1E;color:#F5F0E8;direction:rtl;width:794px;min-height:1123px;overflow-x:hidden}',
+    '.page{width:794px;min-height:1123px;background:#0A0F1E;padding:0 0 30px;overflow:hidden}',
     '.top-bar{height:5px;background:#ff6262}',
-    '.header{background:#111827;padding:22px 30px;display:flex;align-items:flex-start;justify-content:space-between}',
+    '.header{background:#111827;padding:22px 30px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}',
+    '.header>div{min-width:0}',
     '.logo-circle{width:52px;height:52px;background:#ff6262;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}',
     '.co-name{font-size:26px;font-weight:900;letter-spacing:2px;line-height:1;font-family:Cairo,sans-serif}',
     '.co-sub{font-size:10px;color:#9CA3AF;letter-spacing:2px;margin-top:4px}',
@@ -5045,7 +5046,9 @@ async function generateStatement(){
   // بياخد نفس القياسات بالضبط على أي جهاز (كمبيوتر/جوال/آيباد) بدون ما
   // يتأثر بحجم شاشة الجهاز أو بتجميد المتصفح لتبويب بالخلفية.
   const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;top:0;left:-99999px;width:794px;height:1123px;border:none;background:#0A0F1E';
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:1123px;border:none;background:#0A0F1E;opacity:0.01;pointer-events:none;z-index:-1';
+  iframe.setAttribute('width', '794');
+  iframe.setAttribute('height', '1123');
   document.body.appendChild(iframe);
 
   try {
