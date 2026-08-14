@@ -5088,8 +5088,26 @@ async function generateStatement(){
     }
 
     const fname = 'كشف-حساب-'+user.name.replace(/\s+/g,'-')+'-'+new Date().toISOString().slice(0,10)+'.pdf';
-    pdf.save(fname);
-    showToast('✅ تم تحميل كشف الحساب');
+    const pdfBlob = pdf.output('blob');
+    const pdfFile = new File([pdfBlob], fname, {type:'application/pdf'});
+
+    // على الجوال/الآيباد: افتح شاشة المشاركة الأصلية عشان يقدر يبعت الملف مباشرة (واتساب/إيميل/حفظ بالملفات)
+    if(navigator.canShare && navigator.canShare({files:[pdfFile]})){
+      try{
+        await navigator.share({files:[pdfFile], title:fname, text:'كشف حساب - '+user.name});
+        showToast('✅ تم إنشاء كشف الحساب');
+      }catch(shareErr){
+        if(shareErr && shareErr.name==='AbortError'){
+          // المستخدم ألغى شاشة المشاركة — ما في داعي لأي رسالة خطأ
+        } else {
+          pdf.save(fname);
+          showToast('✅ تم تحميل كشف الحساب');
+        }
+      }
+    } else {
+      pdf.save(fname);
+      showToast('✅ تم تحميل كشف الحساب');
+    }
   } catch(e){
     console.error(e);
     showToast('حدث خطأ: '+e.message, 'error');
