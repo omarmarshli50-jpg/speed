@@ -5041,18 +5041,27 @@ async function generateStatement(){
   closeStatementPicker();
   showToast('⏳ جاري إنشاء الكشف...', 'warn');
 
-  const win = window.open('', '_blank', 'width=820,height=900,scrollbars=yes');
-  if(!win){ showToast('يرجى السماح بالنوافذ المنبثقة في المتصفح','error'); return; }
-
-  win.document.open();
-  win.document.write(htmlStr);
-  win.document.close();
-
-  // Wait for fonts then convert to PDF
-  await new Promise(r => setTimeout(r, 2000));
+  // نستخدم iframe مخفي بنفس الصفحة (مش نافذة/تبويب منفصل) — هيك التصميم
+  // بياخد نفس القياسات بالضبط على أي جهاز (كمبيوتر/جوال/آيباد) بدون ما
+  // يتأثر بحجم شاشة الجهاز أو بتجميد المتصفح لتبويب بالخلفية.
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;top:0;left:-99999px;width:794px;height:1123px;border:none;background:#0A0F1E';
+  document.body.appendChild(iframe);
 
   try {
-    const canvas = await html2canvas(win.document.body, {
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(htmlStr);
+    iframe.contentDocument.close();
+
+    // ننتظر تحميل الخط ثم مهلة قصيرة إضافية للتأكد إنه الرسم اكتمل
+    try {
+      if(iframe.contentDocument.fonts && iframe.contentDocument.fonts.ready){
+        await iframe.contentDocument.fonts.ready;
+      }
+    } catch(fe){}
+    await new Promise(r => setTimeout(r, 500));
+
+    const canvas = await html2canvas(iframe.contentDocument.body, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
@@ -5112,7 +5121,7 @@ async function generateStatement(){
     console.error(e);
     showToast('حدث خطأ: '+e.message, 'error');
   } finally {
-    win.close();
+    iframe.remove();
   }
 }
 
