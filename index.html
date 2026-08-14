@@ -2125,6 +2125,46 @@ document.addEventListener('click',function(e){
 </div>
 <style>#shp-img-modal.active{display:flex !important}</style>
 
+<!-- ── STATEMENT PICKER MODAL ── -->
+<div id="stmt-overlay">
+  <div id="stmt-box">
+    <h3>📄 كشف حساب عميل</h3>
+    <p>اختر العميل والفترة الزمنية لإنشاء كشف الحساب</p>
+    <div class="stmt-field">
+      <label>العميل</label>
+      <select id="stmt-user"><option value="">-- اختر العميل --</option></select>
+    </div>
+    <div class="stmt-field">
+      <label>الفترة</label>
+      <select id="stmt-period" onchange="stmtPeriodChange(this)">
+        <option value="all">كامل السجل</option>
+        <option value="7">آخر 7 أيام</option>
+        <option value="30">آخر 30 يوم</option>
+        <option value="90">آخر 90 يوم</option>
+        <option value="custom">فترة مخصصة</option>
+      </select>
+    </div>
+    <div id="stmt-custom-dates" style="display:none;grid-template-columns:1fr 1fr;gap:.8rem">
+      <div class="stmt-field">
+        <label>من تاريخ</label>
+        <input type="date" id="stmt-from">
+      </div>
+      <div class="stmt-field">
+        <label>إلى تاريخ</label>
+        <input type="date" id="stmt-to">
+      </div>
+    </div>
+    <div class="stmt-field">
+      <label>ملاحظة (اختياري)</label>
+      <input type="text" id="stmt-note" placeholder="مثلاً: كشف نهاية الشهر">
+    </div>
+    <div class="stmt-btns">
+      <button class="stmt-btn-gen" onclick="generateStatement()">🖨 إنشاء الكشف</button>
+      <button class="stmt-btn-cancel" onclick="closeStatementPicker()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── FINANCE LOCK MODAL ── -->
 <<<<div id="fin-lock-overlay" class="lock-overlay">
   <div class="lock-box">
@@ -2206,7 +2246,7 @@ document.addEventListener('click',function(e){
 </div>
 
 <script>
-const WA_NUMBER = '905550000000';
+const WA_NUMBER = '905394409222';
 
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -4156,27 +4196,31 @@ function buildEmailHTML(shp, status, staffName, note){
   const tl = (shp.timeline||[]);
   const tlRows = tl.map(t=>`
     <tr>
-      <td style="padding:8px 12px;border-bottom:1px solid #2a2a3e;font-size:13px;color:${STATUS_COLOR[t.status]||'#ccc'};font-weight:700">${STATUS_AR[t.status]||t.status}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #2a2a3e;font-size:12px;color:#9CA3AF">${new Date(t.date).toLocaleString('ar-SA-u-ca-gregory',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #2a2a3e;font-size:12px;color:#ccc">${t.by||'—'}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #2a2a3e;font-size:12px;color:#9CA3AF">${t.note||'—'}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:${STATUS_COLOR[t.status]||'#111'};font-weight:700">${STATUS_AR[t.status]||t.status}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#000000">${new Date(t.date).toLocaleString('ar-SA-u-ca-gregory',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#000000">${t.by||'—'}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#000000">${t.note||'—'}</td>
     </tr>`).join('');
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"><style>
-  body{font-family:Arial,sans-serif;background:#0A0F1E;color:#F5F0E8;margin:0;padding:20px}
-  .container{max-width:600px;margin:0 auto;background:#111827;border-radius:12px;overflow:hidden;border:1px solid #ff6262}
+<head><meta charset="UTF-8">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<style>
+  body{font-family:Arial,sans-serif;background:#f3f4f6;color:#000000;margin:0;padding:20px}
+  .container{max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #ff6262}
   .header{background:#ff6262;padding:24px;text-align:center}
-  .header h1{margin:0;font-size:22px;color:#fff;letter-spacing:2px}
-  .header p{margin:4px 0 0;font-size:12px;color:#fff;opacity:.8}
+  .header h1{margin:0;font-size:22px;color:#ffffff;letter-spacing:2px}
+  .header p{margin:4px 0 0;font-size:12px;color:#ffffff;opacity:.9}
   .body{padding:28px}
   .status-badge{display:inline-block;padding:8px 20px;border-radius:20px;font-size:14px;font-weight:700;margin:12px 0}
-  .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1f2937;font-size:13px}
-  .info-row span:first-child{color:#9CA3AF}
-  .info-row span:last-child{font-weight:700;color:#F5F0E8}
+  .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e7eb;font-size:13px}
+  .info-row span:first-child{color:#000000}
+  .info-row span:last-child{font-weight:700;color:#000000}
   .tl-table{width:100%;border-collapse:collapse;margin-top:8px}
-  .footer{background:#0A0F1E;padding:16px;text-align:center;font-size:11px;color:#6B7280}
+  .footer{background:#f3f4f6;padding:16px;text-align:center;font-size:11px;color:#000000}
+  p, span, td, th, div{color:#000000}
 </style></head>
 <body><div class="container">
   <div class="header">
@@ -4184,23 +4228,23 @@ function buildEmailHTML(shp, status, staffName, note){
     <p>Global Shipping · Turkey</p>
   </div>
   <div class="body">
-    <p style="font-size:16px;margin-bottom:4px">أهلاً، <strong>${name}</strong></p>
-    <p style="color:#9CA3AF;font-size:13px;margin-bottom:16px">تم تحديث حالة شحنتك</p>
-    <div class="status-badge" style="background:${STATUS_COLOR[status]||'#666'}22;color:${STATUS_COLOR[status]||'#ccc'};border:1px solid ${STATUS_COLOR[status]||'#666'}">${STATUS_AR[status]||status}</div>
+    <p style="font-size:16px;margin-bottom:4px;color:#000000">أهلاً، <strong>${name}</strong></p>
+    <p style="color:#000000;font-size:13px;margin-bottom:16px">تم تحديث حالة شحنتك</p>
+    <div class="status-badge" style="background:${STATUS_COLOR[status]||'#666'}22;color:${STATUS_COLOR[status]||'#000000'};border:1px solid ${STATUS_COLOR[status]||'#666'}">${STATUS_AR[status]||status}</div>
     <div class="info-row"><span>رقم الشحنة</span><span style="color:#ff6262">${shp.trackingNo}</span></div>
     <div class="info-row"><span>المنتج</span><span>${shp.product}</span></div>
     <div class="info-row"><span>رقم التتبع</span><span>${shp.trackingCode||'—'}</span></div>
     <div class="info-row"><span>تاريخ التحديث</span><span>${now}</span></div>
-    <div class="info-row"><span>تم بواسطة</span><span style="color:#F59E0B">${staffName}</span></div>
-    ${note ? `<div class="info-row"><span>ملاحظة</span><span style="color:#60A5FA">${note}</span></div>` : ''}
-    ${status==='delivered' ? `<div style="background:rgba(34,197,94,0.1);border:1px solid #22C55E;border-radius:8px;padding:14px;margin:16px 0;text-align:center"><p style="color:#22C55E;font-weight:700;margin:0">🎉 تم استلام شحنتك بنجاح!</p><p style="color:#9CA3AF;font-size:12px;margin:4px 0 0">شكراً لثقتك بـ Speed of Light</p></div>` : ''}
+    <div class="info-row"><span>تم بواسطة</span><span style="color:#000000">${staffName}</span></div>
+    ${note ? `<div class="info-row"><span>ملاحظة</span><span style="color:#000000">${note}</span></div>` : ''}
+    ${status==='delivered' ? `<div style="background:rgba(34,197,94,0.1);border:1px solid #22C55E;border-radius:8px;padding:14px;margin:16px 0;text-align:center"><p style="color:#15803d;font-weight:700;margin:0">🎉 تم استلام شحنتك بنجاح!</p><p style="color:#000000;font-size:12px;margin:4px 0 0">شكراً لثقتك بـ Speed of Light</p></div>` : ''}
     ${tl.length>0 ? `<h3 style="margin:20px 0 10px;font-size:14px;color:#ff6262">📋 سجل رحلة الشحنة</h3>
-    <table class="tl-table" style="background:#0A0F1E;border-radius:8px;overflow:hidden">
-      <thead><tr style="background:#1A2235">
-        <th style="padding:8px 12px;font-size:11px;color:#9CA3AF;text-align:right">الحالة</th>
-        <th style="padding:8px 12px;font-size:11px;color:#9CA3AF;text-align:right">التاريخ</th>
-        <th style="padding:8px 12px;font-size:11px;color:#9CA3AF;text-align:right">بواسطة</th>
-        <th style="padding:8px 12px;font-size:11px;color:#9CA3AF;text-align:right">ملاحظة</th>
+    <table class="tl-table" style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb">
+      <thead><tr style="background:#f3f4f6">
+        <th style="padding:8px 12px;font-size:11px;color:#000000;text-align:right">الحالة</th>
+        <th style="padding:8px 12px;font-size:11px;color:#000000;text-align:right">التاريخ</th>
+        <th style="padding:8px 12px;font-size:11px;color:#000000;text-align:right">بواسطة</th>
+        <th style="padding:8px 12px;font-size:11px;color:#000000;text-align:right">ملاحظة</th>
       </tr></thead>
       <tbody>${tlRows}</tbody>
     </table>` : ''}
@@ -4211,7 +4255,7 @@ function buildEmailHTML(shp, status, staffName, note){
 
 // ── Gmail via Google Apps Script ──
 // غيّر هذا الرابط برابط Google Apps Script الخاص فيك
-const GMAIL_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const GMAIL_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwICT15DWjG_KZndl2DwW8U8vLHdqCUljk7V3aWfbBFGBBElvfuIiA-L3fqTArSwg/exec';
 
 async function sendStatusEmail(shp, status, staffName, noteOverride){
   const customer = DB.getUserById(shp.userId);
@@ -4221,21 +4265,34 @@ async function sendStatusEmail(shp, status, staffName, noteOverride){
   const subject    = 'شحنتك ' + shp.trackingNo + ' – ' + (STATUS_AR[status]||status) + ' | Speed of Light';
   const htmlBody   = buildEmailHTML(shp, status, staffName, latestNote);
 
-  // Show preview modal first
-  const modal = document.getElementById('email-modal');
-  if(modal){
-    document.getElementById('em-to').textContent      = customer.email;
-    document.getElementById('em-name').textContent    = customer.name;
-    document.getElementById('em-shp').textContent     = shp.trackingNo;
-    document.getElementById('em-status').textContent  = STATUS_AR[status]||status;
-    document.getElementById('em-status').style.color  = STATUS_COLOR[status]||'var(--gold)';
-    document.getElementById('em-date').textContent    = new Date().toLocaleString('ar-SA-u-ca-gregory',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    document.getElementById('em-staff').textContent   = staffName;
-    document.getElementById('em-preview').srcdoc      = htmlBody;
+  // إرسال تلقائي فوري بدون نافذة معاينة/تأكيد
+  if(!GMAIL_SCRIPT_URL || GMAIL_SCRIPT_URL.includes('YOUR_GOOGLE')){
+    showToast('⚠️ لم يتم إعداد رابط Gmail Script بعد — الإيميل لم يُرسل','error');
+    return;
+  }
 
-    // Store data for send button
-    modal._pendingSend = { to:customer.email, subject, htmlBody, latestNote };
-    modal.classList.add('active');
+  try {
+    const resp = await fetch(GMAIL_SCRIPT_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({
+        to:       customer.email,
+        subject:  subject,
+        body:     subject, // plain text fallback
+        htmlBody: htmlBody
+      })
+    });
+    const result = await resp.json();
+    if(result.ok){
+      showToast('✅ تم إرسال إيميل تحديث الحالة إلى ' + customer.email);
+      const sentLog = DB._get('sol_emails_sent') || [];
+      sentLog.push({ to:customer.email, subject, date:new Date().toISOString() });
+      DB._set('sol_emails_sent', sentLog);
+    } else {
+      showToast('خطأ في إرسال الإيميل: ' + (result.error||'غير معروف'), 'error');
+    }
+  } catch(err){
+    showToast('خطأ في الاتصال أثناء إرسال الإيميل: ' + err.message, 'error');
   }
 }
 
@@ -5003,6 +5060,7 @@ async function generateStatement(){
       width: 794,
       windowWidth: 794,
       logging: false,
+      foreignObjectRendering: true,
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.92);
